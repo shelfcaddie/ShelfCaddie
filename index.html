@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>ShelfCaddie - Inventory Intelligence</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body { background:#080808; color:#e0e0e0; font-family:'DM Sans',sans-serif; min-height:100vh; }
+input, select, button { outline:none; }
+::-webkit-scrollbar { width:6px; }
+::-webkit-scrollbar-track { background:#111; }
+::-webkit-scrollbar-thumb { background:#333; border-radius:3px; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+
+const BALLS_DATA = [
+  { description:"Callaway Chrome Tour", vendor:"CALLAWAY", qty_sold:1840, amount:25760.00, margin:28.50, units_on_hand:36 },
+  { description:"Callaway Chrome Tour X", vendor:"CALLAWAY", qty_sold:1620, amount:22680.00, margin:29.00, units_on_hand:42 },
+  { description:"Callaway Chrome Tour Triple Diamond", vendor:"CALLAWAY", qty_sold:1380, amount:19320.00, margin:31.00, units_on_hand:30 },
+  { description:"Callaway Chrome Soft", vendor:"CALLAWAY", qty_sold:1540, amount:21560.00, margin:26.00, units_on_hand:48 },
+  { description:"Callaway Supersoft Sleeve", vendor:"CALLAWAY", qty_sold:2200, amount:17380.00, margin:41.00, units_on_hand:120 },
+  { description:"Callaway ERC Soft Sleeve", vendor:"CALLAWAY", qty_sold:980, amount:9800.00, margin:27.00, units_on_hand:60 },
+  { description:"Titleist Pro V1", vendor:"TITLEIST", qty_sold:9, amount:396.00, margin:30.99, units_on_hand:180 },
+  { description:"Titleist Pro V1x", vendor:"TITLEIST", qty_sold:7, amount:308.00, margin:30.99, units_on_hand:192 },
+  { description:"Titleist AVX", vendor:"TITLEIST", qty_sold:4, amount:176.00, margin:27.07, units_on_hand:216 },
+  { description:"Titleist Tour Soft", vendor:"TITLEIST", qty_sold:6, amount:180.00, margin:27.41, units_on_hand:168 },
+  { description:"Titleist Velocity", vendor:"TITLEIST", qty_sold:3, amount:90.00, margin:37.08, units_on_hand:240 },
+  { description:"Titleist Trufeel", vendor:"TITLEIST", qty_sold:5, amount:100.00, margin:39.99, units_on_hand:200 },
+  { description:"Titleist TruFeel Sleeve", vendor:"TITLEIST", qty_sold:2, amount:48.00, margin:35.00, units_on_hand:144 },
+  { description:"Taylormade TP5", vendor:"TAYLORMADE", qty_sold:8, amount:352.00, margin:24.99, units_on_hand:156 },
+  { description:"Taylormade TP5x", vendor:"TAYLORMADE", qty_sold:6, amount:264.00, margin:24.99, units_on_hand:168 },
+  { description:"Taylormade Tour Response", vendor:"TAYLORMADE", qty_sold:4, amount:140.00, margin:29.37, units_on_hand:132 },
+  { description:"Taylormade Speed Soft", vendor:"TAYLORMADE", qty_sold:2, amount:59.00, margin:47.23, units_on_hand:200 },
+  { description:"Srixon Q Star Tour", vendor:"SRIXON", qty_sold:320, amount:3520.00, margin:44.30, units_on_hand:72 },
+  { description:"Srixon Soft Feel", vendor:"SRIXON", qty_sold:280, amount:2016.00, margin:48.09, units_on_hand:84 },
+];
+
+const GLOVES_DATA = [
+  { description:"Callaway Tour Authentic Triple Diamond", vendor:"CALLAWAY", qty_sold:680, amount:13600.00, margin:38.00, units_on_hand:48 },
+  { description:"Callaway Tour Authentic", vendor:"CALLAWAY", qty_sold:920, amount:16560.00, margin:36.00, units_on_hand:60 },
+  { description:"Callaway Women's Aura", vendor:"CALLAWAY", qty_sold:540, amount:8640.00, margin:34.00, units_on_hand:72 },
+  { description:"Callaway Weather Spann Glove", vendor:"CALLAWAY", qty_sold:820, amount:10660.00, margin:36.88, units_on_hand:60 },
+  { description:"Callaway Tour Glove", vendor:"CALLAWAY", qty_sold:560, amount:11200.00, margin:25.14, units_on_hand:72 },
+  { description:"Callaway Rain Glove 2 Pack", vendor:"CALLAWAY", qty_sold:340, amount:8840.00, margin:42.09, units_on_hand:48 },
+  { description:"Footjoy Weathersof Singles", vendor:"FOOTJOY", qty_sold:480, amount:6240.00, margin:42.36, units_on_hand:60 },
+  { description:"Footjoy Soft Joy Glove", vendor:"FOOTJOY", qty_sold:320, amount:5440.00, margin:40.94, units_on_hand:84 },
+  { description:"Titleist Players Glove", vendor:"TITLEIST", qty_sold:4, amount:80.00, margin:28.00, units_on_hand:168 },
+  { description:"Titleist Perma-Soft Glove", vendor:"TITLEIST", qty_sold:3, amount:57.00, margin:30.00, units_on_hand:192 },
+  { description:"Taylor Made Flex Glove", vendor:"TAYLORMADE", qty_sold:5, amount:80.00, margin:38.09, units_on_hand:180 },
+  { description:"Srixon Gloves", vendor:"SRIXON", qty_sold:220, amount:2640.00, margin:67.52, units_on_hand:36 },
+];
+
+const BAGS_DATA = [
+  { description:"Callaway Summit Stand Bag", vendor:"CALLAWAY", qty_sold:48, amount:14400.00, margin:38.00, units_on_hand:12 },
+  { description:"Callaway Org 14 Cart Bag", vendor:"CALLAWAY", qty_sold:36, amount:9000.00, margin:35.00, units_on_hand:8 },
+  { description:"Callaway Fairway C Stand Bag", vendor:"CALLAWAY", qty_sold:24, amount:4800.00, margin:32.00, units_on_hand:6 },
+  { description:"Titleist Links Legend Staff Bag", vendor:"TITLEIST", qty_sold:1, amount:599.00, margin:28.00, units_on_hand:14 },
+  { description:"Titleist Players 4 Stand Bag", vendor:"TITLEIST", qty_sold:2, amount:598.00, margin:30.00, units_on_hand:18 },
+  { description:"Taylormade FlexTech Stand Bag", vendor:"TAYLORMADE", qty_sold:3, amount:597.00, margin:31.00, units_on_hand:16 },
+];
+
+const HATS_DATA = [
+  { description:"Callaway Birdie Putt Rope", vendor:"CALLAWAY", qty_sold:284, amount:7100.00, margin:42.00, units_on_hand:48 },
+  { description:"Callaway Carlsbad Trucker", vendor:"CALLAWAY", qty_sold:312, amount:7488.00, margin:40.00, units_on_hand:36 },
+  { description:"Titleist Performance Hat", vendor:"TITLEIST", qty_sold:6, amount:180.00, margin:32.00, units_on_hand:144 },
+  { description:"Titleist Santa Cruz Hat", vendor:"TITLEIST", qty_sold:4, amount:100.00, margin:30.00, units_on_hand:168 },
+  { description:"Branded Bills Rope Hat", vendor:"BRANDED BILLS", qty_sold:196, amount:5880.00, margin:44.00, units_on_hand:60 },
+  { description:"Puka 5000m Rudder Hat", vendor:"PUKA", qty_sold:88, amount:3520.00, margin:46.00, units_on_hand:72 },
+];
+
+const HARDGOODS_DATA = [
+  { description:"Quantum Max Driver", vendor:"CALLAWAY", qty_sold:124, amount:49600.00, margin:32.00, units_on_hand:8 },
+  { description:"Quantum TD Max Driver", vendor:"CALLAWAY", qty_sold:96, amount:38400.00, margin:31.00, units_on_hand:6 },
+  { description:"Quantum TD Driver", vendor:"CALLAWAY", qty_sold:88, amount:30800.00, margin:30.00, units_on_hand:7 },
+  { description:"Quantum Fairway", vendor:"CALLAWAY", qty_sold:72, amount:25200.00, margin:29.00, units_on_hand:5 },
+  { description:"TaylorMade Qi4D LS Driver", vendor:"TAYLORMADE", qty_sold:4, amount:1400.00, margin:27.00, units_on_hand:18 },
+  { description:"TaylorMade Qi4D Fairway", vendor:"TAYLORMADE", qty_sold:3, amount:900.00, margin:26.00, units_on_hand:22 },
+  { description:"Titleist Vokey SM10 Wedge", vendor:"TITLEIST", qty_sold:5, amount:750.00, margin:28.00, units_on_hand:32 },
+  { description:"Odyssey Putter", vendor:"CALLAWAY", qty_sold:68, amount:20400.00, margin:33.00, units_on_hand:10 },
+];
+
+const SHIRTS_DATA = [
+  { description:"Holderness & Bourne Performance Shirt", vendor:"H&B", qty_sold:248, amount:19840.00, margin:44.00, units_on_hand:36 },
+  { description:"Holderness & Bourne Airation Shirt", vendor:"H&B", qty_sold:196, amount:15680.00, margin:43.00, units_on_hand:42 },
+  { description:"Peter Millar Summer Comfort", vendor:"PETER MILLAR", qty_sold:184, amount:16560.00, margin:42.00, units_on_hand:48 },
+  { description:"Polo Classic Fit Mesh Shirt", vendor:"POLO", qty_sold:6, amount:480.00, margin:35.00, units_on_hand:120 },
+];
+
+const TAB_STATS = {
+  all:       { revYOY: 14.2, unitsYOY: 11.8, marginYOY: 1.4  },
+  balls:     { revYOY: 8.4,  unitsYOY: 6.2,  marginYOY: 1.8  },
+  gloves:    { revYOY: 12.1, unitsYOY: 9.3,  marginYOY: -1.2 },
+  bags:      { revYOY: -4.7, unitsYOY: -3.2, marginYOY: 0.4  },
+  hats:      { revYOY: 18.3, unitsYOY: 14.6, marginYOY: 2.1  },
+  hardgoods: { revYOY: 22.7, unitsYOY: 19.4, marginYOY: 3.2  },
+  shirts:    { revYOY: 31.4, unitsYOY: 27.8, marginYOY: 1.6  },
+};
+
+const ALL_DATA = [...BALLS_DATA, ...GLOVES_DATA, ...BAGS_DATA, ...HATS_DATA, ...HARDGOODS_DATA, ...SHIRTS_DATA];
+
+function analyze(items) {
+  const total = items.reduce((a,b) => a+b.qty_sold, 0);
+  return items.map(item => {
+    const velocity = item.qty_sold / 12;
+    const monthsLeft = velocity > 0 ? item.units_on_hand / velocity : 999;
+    const share = ((item.qty_sold / total) * 100).toFixed(1);
+    let status, label;
+    if (item.qty_sold <= 2) { status="dead"; label="Dead Stock"; }
+    else if (monthsLeft >= 8 || (item.qty_sold < 15 && item.units_on_hand > 80)) { status="risk"; label="At Risk"; }
+    else if (monthsLeft >= 4) { status="watch"; label="Watch"; }
+    else { status="healthy"; label="Healthy"; }
+    return { ...item, velocity: Math.round(velocity*10)/10, monthsLeft: monthsLeft===999?"∞":Math.round(monthsLeft*10)/10, share, status, label };
+  });
+}
+
+const STATUS_STYLES = {
+  dead:    { bg:"#1a0000", border:"#ff2222", color:"#ff6666", dot:"#ff2222" },
+  risk:    { bg:"#1a0a00", border:"#ff8800", color:"#ffaa44", dot:"#ff8800" },
+  watch:   { bg:"#1a1a00", border:"#ddcc00", color:"#eedc44", dot:"#ddcc00" },
+  healthy: { bg:"#001a08", border:"#22cc66", color:"#44ee88", dot:"#22cc66" },
+};
+
+function YOY({pct}) {
+  const color = pct > 0 ? "#22cc66" : pct < 0 ? "#ff4444" : "#ddcc00";
+  const arrow = pct > 0 ? "▲" : pct < 0 ? "▼" : "—";
+  return (
+    <span style={{fontSize:9,fontFamily:"'DM Mono',monospace",color,marginLeft:5,fontWeight:600}}>
+      {arrow} {Math.abs(pct)}% YOY
+    </span>
+  );
+}
+
+function Badge({status, label}) {
+  const s = STATUS_STYLES[status];
+  return (
+    <span style={{display:"inline-flex",alignItems:"center",gap:5,background:s.bg,border:`1px solid ${s.border}`,color:s.color,borderRadius:20,padding:"3px 10px",fontSize:10,fontFamily:"'DM Mono',monospace",fontWeight:600,letterSpacing:1,textTransform:"uppercase",whiteSpace:"nowrap"}}>
+      <span style={{width:5,height:5,borderRadius:"50%",background:s.dot,flexShrink:0}}/>
+      {label}
+    </span>
+  );
+}
+
+function StatCards({items, tabKey}) {
+  const counts = {dead:items.filter(d=>d.status==="dead").length,risk:items.filter(d=>d.status==="risk").length,watch:items.filter(d=>d.status==="watch").length,healthy:items.filter(d=>d.status==="healthy").length};
+  const totalRev = items.reduce((a,b)=>a+b.amount,0);
+  const totalUnits = items.reduce((a,b)=>a+b.qty_sold,0);
+  const avgMargin = (items.reduce((a,b)=>a+b.margin,0)/items.length).toFixed(1);
+  const yoy = TAB_STATS[tabKey];
+  return (
+    <div>
+      <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:10,marginBottom:12}}>
+        {[{label:"Dead Stock",value:counts.dead,color:"#ff4444",sub:"Needs action"},{label:"At Risk",value:counts.risk,color:"#ff8800",sub:"Overstocked"},{label:"Watch List",value:counts.watch,color:"#ddcc00",sub:"Slowing"},{label:"Healthy",value:counts.healthy,color:"#22cc66",sub:"Moving well"}].map(c=>(
+          <div key={c.label} style={{background:"#0d0d0d",border:"1px solid #1e1e1e",borderRadius:12,padding:"14px 18px"}}>
+            <div style={{fontSize:9,color:"#555",fontFamily:"'DM Mono',monospace",letterSpacing:2,textTransform:"uppercase",marginBottom:4}}>{c.label}</div>
+            <div style={{fontSize:24,fontWeight:800,color:c.color,fontFamily:"'Playfair Display',serif",lineHeight:1}}>{c.value}</div>
+            <div style={{fontSize:9,color:"#444",fontFamily:"'DM Mono',monospace",marginTop:4}}>{c.sub}</div>
+          </div>
+        ))}
+      </div>
+      <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:10,marginBottom:18}}>
+        <div style={{background:"#0d0d0d",border:"1px solid #1e1e1e",borderRadius:12,padding:"14px 18px"}}>
+          <div style={{fontSize:9,color:"#555",fontFamily:"'DM Mono',monospace",letterSpacing:2,textTransform:"uppercase",marginBottom:4}}>Total Revenue <YOY pct={yoy.revYOY}/></div>
+          <div style={{fontSize:24,fontWeight:800,color:"#ffffff",fontFamily:"'Playfair Display',serif",lineHeight:1}}>${totalRev.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}</div>
+          <div style={{fontSize:9,color:"#444",fontFamily:"'DM Mono',monospace",marginTop:4}}>2026 YTD</div>
+        </div>
+        <div style={{background:"#0d0d0d",border:"1px solid #1e1e1e",borderRadius:12,padding:"14px 18px"}}>
+          <div style={{fontSize:9,color:"#555",fontFamily:"'DM Mono',monospace",letterSpacing:2,textTransform:"uppercase",marginBottom:4}}>Units Sold <YOY pct={yoy.unitsYOY}/></div>
+          <div style={{fontSize:24,fontWeight:800,color:"#ffffff",fontFamily:"'Playfair Display',serif",lineHeight:1}}>{totalUnits.toLocaleString()}</div>
+          <div style={{fontSize:9,color:"#444",fontFamily:"'DM Mono',monospace",marginTop:4}}>2026 YTD</div>
+        </div>
+        <div style={{background:"#0d0d0d",border:"1px solid #1e1e1e",borderRadius:12,padding:"14px 18px"}}>
+          <div style={{fontSize:9,color:"#555",fontFamily:"'DM Mono',monospace",letterSpacing:2,textTransform:"uppercase",marginBottom:4}}>Avg Margin <YOY pct={yoy.marginYOY}/></div>
+          <div style={{fontSize:24,fontWeight:800,color:"#22cc66",fontFamily:"'Playfair Display',serif",lineHeight:1}}>{avgMargin}%</div>
+          <div style={{fontSize:9,color:"#444",fontFamily:"'DM Mono',monospace",marginTop:4}}>Blended</div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function Table({items, tabKey}) {
+  const [filter, setFilter] = React.useState("all");
+  const [vendor, setVendor] = React.useState("all");
+  const [selected, setSelected] = React.useState(null);
+  const statusOrder = {dead:0,risk:1,watch:2,healthy:3};
+  const vendors = ["all",...Array.from(new Set(items.map(d=>d.vendor)))];
+  const filtered = items.filter(d=>filter==="all"||d.status===filter).filter(d=>vendor==="all"||d.vendor===vendor).sort((a,b)=>statusOrder[a.status]-statusOrder[b.status]);
+  const sel = selected ? items.find(d=>d.description===selected) : null;
+  return (
+    <div>
+      <StatCards items={items} tabKey={tabKey}/>
+      <div style={{display:"flex",gap:8,marginBottom:14,flexWrap:"wrap"}}>
+        {[{k:"all",l:"All"},{k:"dead",l:"Dead Stock"},{k:"risk",l:"At Risk"},{k:"watch",l:"Watch"},{k:"healthy",l:"Healthy"}].map(f=>(
+          <button key={f.k} onClick={()=>setFilter(f.k)} style={{background:filter===f.k?"#1e1e1e":"transparent",border:filter===f.k?"1px solid #333":"1px solid #1a1a1a",color:filter===f.k?"#fff":"#555",borderRadius:8,padding:"5px 12px",fontSize:11,fontFamily:"'DM Mono',monospace"}}>{f.l}</button>
+        ))}
+        <select value={vendor} onChange={e=>setVendor(e.target.value)} style={{background:"#0d0d0d",border:"1px solid #1e1e1e",color:"#aaa",borderRadius:8,padding:"5px 10px",fontSize:11,fontFamily:"'DM Mono',monospace"}}>
+          {vendors.map(v=><option key={v} value={v}>{v==="all"?"All Vendors":v}</option>)}
+        </select>
+      </div>
+      <div style={{background:"#0a0a0a",border:"1px solid #1a1a1a",borderRadius:12,overflow:"hidden"}}>
+        <div style={{display:"grid",gridTemplateColumns:"130px 1fr 100px 60px 70px 70px 70px",padding:"10px 16px",background:"#0d0d0d",borderBottom:"1px solid #1a1a1a",fontSize:9,color:"#444",fontFamily:"'DM Mono',monospace",letterSpacing:1.5,textTransform:"uppercase"}}>
+          <span>Vendor</span><span>Description</span><span>Status</span>
+          <span style={{textAlign:"right"}}>Sold</span>
+          <span style={{textAlign:"right"}}>On Hand</span>
+          <span style={{textAlign:"right"}}>Mo. Left</span>
+          <span style={{textAlign:"right"}}>Margin</span>
+        </div>
+        {filtered.map((item,i)=>(
+          <div key={item.description+i}>
+            <div onClick={()=>setSelected(selected===item.description?null:item.description)} style={{display:"grid",gridTemplateColumns:"130px 1fr 100px 60px 70px 70px 70px",padding:"11px 16px",borderBottom:i<filtered.length-1?"1px solid #111":"none",background:selected===item.description?"#111":i%2===0?"#0a0a0a":"#0c0c0c",cursor:"pointer",alignItems:"center"}}>
+              <span style={{fontSize:10,color:"#555",fontFamily:"'DM Mono',monospace"}}>{item.vendor}</span>
+              <span style={{fontSize:12,color:"#ddd",fontWeight:500,paddingRight:12}}>{item.description}</span>
+              <div><Badge status={item.status} label={item.label}/></div>
+              <span style={{textAlign:"right",fontSize:12,fontWeight:600,color:"#ffffff",fontFamily:"'DM Mono',monospace"}}>{item.qty_sold}</span>
+              <span style={{textAlign:"right",fontSize:12,color:"#888",fontFamily:"'DM Mono',monospace"}}>{item.units_on_hand}</span>
+              <span style={{textAlign:"right",fontSize:12,fontWeight:600,fontFamily:"'DM Mono',monospace",color:item.monthsLeft==="∞"?"#ff4444":typeof item.monthsLeft==="number"&&item.monthsLeft>=8?"#ff8800":item.monthsLeft>=4?"#ddcc00":"#22cc66"}}>{item.monthsLeft==="∞"?"∞":`${item.monthsLeft}mo`}</span>
+              <span style={{textAlign:"right",fontSize:12,color:"#22cc66",fontFamily:"'DM Mono',monospace"}}>{item.margin}%</span>
+            </div>
+            {selected===item.description && sel && (
+              <div style={{padding:"18px 24px",background:"#0f0f0f",borderBottom:"1px solid #1a1a1a"}}>
+                <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:12,marginBottom:14}}>
+                  {[{l:"Units Sold",v:sel.qty_sold},{l:"Revenue",v:`$${sel.amount.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}`},{l:"Margin",v:`${sel.margin}%`},{l:"Category Share",v:`${sel.share}%`}].map(s=>(
+                    <div key={s.l} style={{background:"#0a0a0a",border:"1px solid #1a1a1a",borderRadius:8,padding:"10px 14px"}}>
+                      <div style={{fontSize:9,color:"#444",fontFamily:"'DM Mono',monospace",letterSpacing:1,marginBottom:4}}>{s.l}</div>
+                      <div style={{fontSize:18,fontWeight:700,color:"#fff",fontFamily:"'Playfair Display',serif"}}>{s.v}</div>
+                    </div>
+                  ))}
+                </div>
+                <div style={{padding:"12px 16px",borderRadius:10,background:sel.status==="dead"?"#1a0000":sel.status==="risk"?"#1a0a00":sel.status==="watch"?"#1a1500":"#001a08",border:`1px solid ${sel.status==="dead"?"#ff222233":sel.status==="risk"?"#ff880033":sel.status==="watch"?"#ddcc0033":"#22cc6633"}`}}>
+                  <div style={{fontSize:9,color:"#555",fontFamily:"'DM Mono',monospace",letterSpacing:2,marginBottom:5}}>SHELFCADDIE RECOMMENDATION</div>
+                  <div style={{fontSize:12,color:"#ccc",lineHeight:1.6}}>
+                    {sel.status==="dead"&&`⚠️ Only ${sel.qty_sold} unit(s) sold YTD. Consider returning to vendor, marking down, or removing from next order cycle.`}
+                    {sel.status==="risk"&&`🔶 At ${sel.velocity} units/month velocity, you have ${sel.monthsLeft} months of stock on hand. Pause reorders and reduce rep allocation.`}
+                    {sel.status==="watch"&&`👁 Selling at ${sel.velocity} units/month with ${sel.monthsLeft} months remaining. Monitor — do not increase order quantity.`}
+                    {sel.status==="healthy"&&`✅ Strong performer at ${sel.velocity} units/month. Consider increasing reorder buffer to avoid stockouts during peak season.`}
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function App() {
+  const [loggedIn, setLoggedIn] = React.useState(false);
+  const [user, setUser] = React.useState("");
+  const [pass, setPass] = React.useState("");
+  const [error, setError] = React.useState("");
+  const [loading, setLoading] = React.useState(false);
+  const [tab, setTab] = React.useState("all");
+
+  const balls = analyze(BALLS_DATA);
+  const gloves = analyze(GLOVES_DATA);
+  const bags = analyze(BAGS_DATA);
+  const hats = analyze(HATS_DATA);
+  const hardgoods = analyze(HARDGOODS_DATA);
+  const shirts = analyze(SHIRTS_DATA);
+  const all = analyze(ALL_DATA);
+
+  const login = () => {
+    if (user.trim().toLowerCase() === "head pro" && pass.trim() === "callawaystaffer") {
+      setLoading(true);
+      setTimeout(() => { setLoading(false); setLoggedIn(true); }, 1200);
+    } else {
+      setError("Invalid credentials. Please try again.");
+    }
+  };
+
+  if (!loggedIn) return (
+    <div style={{minHeight:"100vh",background:"#080808",display:"flex",alignItems:"center",justifyContent:"center",position:"relative"}}>
+      <div style={{position:"fixed",inset:0,backgroundImage:"linear-gradient(#1a1a1a 1px,transparent 1px),linear-gradient(90deg,#1a1a1a 1px,transparent 1px)",backgroundSize:"40px 40px",opacity:0.3}}/>
+      <div style={{position:"relative",background:"#0a0a0a",border:"1px solid #1e1e1e",borderRadius:20,padding:"48px 52px",width:"90%",maxWidth:420,zIndex:1}}>
+        <div style={{textAlign:"center",marginBottom:36}}>
+          <div style={{width:56,height:56,background:"linear-gradient(135deg,#1a4a2e,#2d7a4f)",borderRadius:14,display:"inline-flex",alignItems:"center",justifyContent:"center",fontSize:28,marginBottom:14}}>⛳</div>
+          <div style={{fontSize:24,fontWeight:800,fontFamily:"'Playfair Display',serif",color:"#fff",letterSpacing:-0.5}}>ShelfCaddie</div>
+          <div style={{fontSize:10,color:"#444",fontFamily:"'DM Mono',monospace",letterSpacing:3,marginTop:4}}>INVENTORY INTELLIGENCE</div>
+        </div>
+        <div style={{display:"flex",flexDirection:"column",gap:14}}>
+          <div>
+            <div style={{fontSize:10,color:"#555",fontFamily:"'DM Mono',monospace",letterSpacing:2,marginBottom:6}}>USERNAME</div>
+            <input value={user} onChange={e=>{setUser(e.target.value);setError("");}} onKeyDown={e=>e.key==="Enter"&&login()} placeholder="Enter username" style={{width:"100%",background:"#111",border:"1px solid #222",borderRadius:10,padding:"12px 14px",color:"#ddd",fontSize:13,fontFamily:"'DM Sans',sans-serif"}}/>
+          </div>
+          <div>
+            <div style={{fontSize:10,color:"#555",fontFamily:"'DM Mono',monospace",letterSpacing:2,marginBottom:6}}>PASSWORD</div>
+            <input type="password" value={pass} onChange={e=>{setPass(e.target.value);setError("");}} onKeyDown={e=>e.key==="Enter"&&login()} placeholder="Enter password" style={{width:"100%",background:"#111",border:"1px solid #222",borderRadius:10,padding:"12px 14px",color:"#ddd",fontSize:13,fontFamily:"'DM Sans',sans-serif"}}/>
+          </div>
+          {error && <div style={{fontSize:12,color:"#ff4444",fontFamily:"'DM Mono',monospace",textAlign:"center"}}>{error}</div>}
+          <button onClick={login} style={{background:"linear-gradient(135deg,#1a4a2e,#2d7a4f)",border:"none",borderRadius:10,padding:"14px",color:"#fff",fontSize:14,fontWeight:600,fontFamily:"'DM Sans',sans-serif",marginTop:6,opacity:loading?0.7:1}}>
+            {loading?"Signing in...":"Sign In"}
+          </button>
+        </div>
+        <div style={{textAlign:"center",marginTop:20,fontSize:10,color:"#333",fontFamily:"'DM Mono',monospace"}}>POWERED BY SHELFCADDIE · AI FOR GOLF PRO SHOPS</div>
+      </div>
+    </div>
+  );
+
+  const tabs = [
+    {k:"all",       l:"All",        data:all},
+    {k:"balls",     l:"Golf Balls", data:balls},
+    {k:"gloves",    l:"Gloves",     data:gloves},
+    {k:"bags",      l:"Bags",       data:bags},
+    {k:"hats",      l:"Hats",       data:hats},
+    {k:"hardgoods", l:"Hard Goods", data:hardgoods},
+    {k:"shirts",    l:"Shirts",     data:shirts},
+  ];
+  const current = tabs.find(t=>t.k===tab);
+
+  return (
+    <div style={{minHeight:"100vh",background:"#080808"}}>
+      <div style={{background:"#0a0a0a",borderBottom:"1px solid #1a1a1a",padding:"0 32px",display:"flex",alignItems:"center",justifyContent:"space-between",height:60}}>
+        <div style={{display:"flex",alignItems:"center",gap:12}}>
+          <div style={{width:30,height:30,background:"linear-gradient(135deg,#1a4a2e,#2d7a4f)",borderRadius:8,display:"flex",alignItems:"center",justifyContent:"center",fontSize:16}}>⛳</div>
+          <div>
+            <div style={{fontSize:16,fontWeight:700,fontFamily:"'Playfair Display',serif",letterSpacing:-0.5,lineHeight:1}}>ShelfCaddie</div>
+            <div style={{fontSize:9,color:"#444",fontFamily:"'DM Mono',monospace",letterSpacing:2}}>INVENTORY INTELLIGENCE</div>
+          </div>
+        </div>
+        <div style={{display:"flex",alignItems:"center",gap:16}}>
+          <div style={{textAlign:"right"}}>
+            <div style={{fontSize:12,color:"#ddd",fontWeight:600}}>TPC Sawgrass</div>
+            <div style={{fontSize:9,color:"#444",fontFamily:"'DM Mono',monospace"}}>head pro</div>
+          </div>
+          <button onClick={()=>setLoggedIn(false)} style={{background:"#111",border:"1px solid #222",color:"#666",borderRadius:8,padding:"5px 12px",fontSize:10,fontFamily:"'DM Mono',monospace",letterSpacing:1}}>SIGN OUT</button>
+        </div>
+      </div>
+
+      <div style={{padding:"24px 32px",maxWidth:1400,margin:"0 auto"}}>
+        <div style={{marginBottom:20}}>
+          <div style={{fontSize:10,color:"#444",fontFamily:"'DM Mono',monospace",letterSpacing:2,marginBottom:3}}>2026 YTD · NORTHSTAR POS</div>
+          <h1 style={{fontSize:24,fontFamily:"'Playfair Display',serif",fontWeight:800,color:"#fff"}}>TPC Sawgrass — Inventory Dashboard</h1>
+        </div>
+
+        <div style={{display:"flex",gap:2,marginBottom:20,background:"#0d0d0d",padding:4,borderRadius:12,width:"fit-content",border:"1px solid #1a1a1a",flexWrap:"wrap"}}>
+          {tabs.map(t=>(
+            <button key={t.k} onClick={()=>setTab(t.k)} style={{background:tab===t.k?"#1e1e1e":"transparent",border:tab===t.k?"1px solid #2a2a2a":"1px solid transparent",color:tab===t.k?"#fff":"#555",borderRadius:8,padding:"7px 14px",fontSize:11,fontFamily:"'DM Sans',sans-serif",fontWeight:500}}>
+              {t.l}
+            </button>
+          ))}
+        </div>
+
+        <Table items={current.data} tabKey={tab}/>
+
+        <div style={{marginTop:24,textAlign:"center",color:"#222",fontSize:10,fontFamily:"'DM Mono',monospace",letterSpacing:2}}>
+          SHELFCADDIE · AI INVENTORY INTELLIGENCE FOR GOLF PRO SHOPS · © 2026
+        </div>
+      </div>
+    </div>
+  );
+}
+
+ReactDOM.render(<App/>, document.getElementById('root'));
+</script>
+</body>
+</html>
